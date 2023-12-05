@@ -15,4 +15,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "My Application"
 include(":app")
- 
+include(":Filament")
+include (":app")
+include (":libs:filament")

@@ -1,9 +1,27 @@
+<!--<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:description="@string/accessibility_service_description"-->
+<!--    android:accessibilityEventTypes="typeAllMask"-->
+<!--    android:accessibilityFlags="flagRequestTouchExplorationMode|flagIncludeNotImportantViews|flagReportViewIds|flagRetrieveInteractiveWindows|flagRequestEnhancedWebAccessibility|flagServiceHandlesDoubleTap|flagSendMotionEvents"-->
+<!--    android:accessibilityFeedbackType="feedbackSpoken"-->
+<!--    android:canRetrieveWindowContent="true"-->
+<!--    android:canRequestTouchExplorationMode="true"-->
+<!--    />-->
 
 <accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:description="@string/accessibility_service_description"
     android:accessibilityEventTypes="typeAllMask"
-    android:accessibilityFlags="flagReportViewIds"
     android:accessibilityFeedbackType="feedbackSpoken"
-    android:notificationTimeout="10000"
+    android:accessibilityFlags="flagRequestTouchExplorationMode|flagReportViewIds|flagRequestEnhancedWebAccessibility|flagRetrieveInteractiveWindows"
+    android:canPerformGestures="true"
+    android:canRequestEnhancedWebAccessibility="true"
+    android:canRequestFilterKeyEvents="true"
     android:canRetrieveWindowContent="true"
-    />
+    android:canRequestTouchExplorationMode="true"
+    android:notificationTimeout="100" />
+<!--<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--android:description="@string/accessibility_service_description"-->
+<!--android:accessibilityEventTypes="typeAllMask"-->
+<!--android:accessibilityFlags="flagRequestTouchExplorationMode|flagReportViewIds|flagRequestEnhancedWebAccessibility|flagRetrieveInteractiveWindows|"-->
+<!--android:accessibilityFeedbackType="feedbackSpoken"-->
+<!--android:canRetrieveWindowContent="true"-->
+<!--android:canRequestTouchExplorationMode="true">-->
+<!--    android:canRequestTouchExplorationMode="true"-->

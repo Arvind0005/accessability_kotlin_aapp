@@ -1,20 +1,43 @@
 package com.example.myapplication
 
+import HighlightOverlay
 import android.accessibilityservice.AccessibilityService
+import android.annotation.SuppressLint
+//import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.util.Log
 import android.view.KeyEvent
+import android.view.View
 import android.view.accessibility.AccessibilityEvent
+import android.widget.ScrollView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
+import android.app.AlertDialog
+import android.content.SharedPreferences
 
 
-class MyAccessibilityService : AccessibilityService() {
+class MyAccessibilityService<AccessibilityNodeInfo> : AccessibilityService() {
+//    private var broadcastReceiver: BroadcastReceiver? = null
     private val capturedTextLiveData = MutableLiveData<String>()
+    private var highlightOverlay: HighlightOverlay? = null
+    private var youtube=false;
+    lateinit var sharedPreferences:SharedPreferences;
+    lateinit var webIntent: Intent
 
-    fun getCapturedTextLiveData(): LiveData<String> {
-        return capturedTextLiveData
+    var caption="";
+
+
+    override fun onCreate() {
+        sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        var serviceStarted = sharedPreferences.getBoolean("serviceStarted", false)
+        val editor = sharedPreferences.edit()
+        super.onCreate()
+        highlightOverlay = HighlightOverlay(this)
     }
     override fun onInterrupt() {}
     override fun onServiceConnected() {
@@ -22,74 +45,106 @@ class MyAccessibilityService : AccessibilityService() {
         println("Accessibility was connected!")
     }
 
-    /*EventType: TYPE_WINDOW_CONTENT_CHANGED; EventTime: 147911568;
-    PackageName: com.android.systemui; MovementGranularity: 0; Action: 0;
-    ContentChangeTypes: [CONTENT_CHANGE_TYPE_TEXT, CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION];
-    WindowChangeTypes: [] [ ClassName: android.widget.FrameLayout; Text: [];
-    ContentDescription: Network Speed Status Bar Item 18 KB/s; ItemCount: -1;
-    CurrentItemIndex: -1; Enabled: true; Password: false; Checked: false;
-    FullScreen: false; Scrollable: false; BeforeText: null; FromIndex: -1;
-    ToIndex: -1; ScrollX: 0; ScrollY: 0; MaxScrollX: 0; MaxScrollY: 0; ScrollDeltaX: -1;
-    ScrollDeltaY: -1; AddedCount: -1; RemovedCount: -1; ParcelableData: null ]; recordCount: 1
-
-     EventType: TYPE_ANNOUNCEMENT; EventTime: 148797623; PackageName: com.oppo.launcher;
-     MovementGranularity: 0; Action: 0; ContentChangeTypes: [];
-     WindowChangeTypes: [] [ ClassName: android.widget.ScrollView; Text: [Page 2 of 5];
-     ContentDescription: null; ItemCount: -1; CurrentItemIndex: -1;
-     Enabled: true; Password: false; Checked: false; FullScreen: false; Scrollable: true;
-     BeforeText: null; FromIndex: -1; ToIndex: -1; ScrollX: 1033; ScrollY: 0; MaxScrollX: 0;
-     MaxScrollY: 0; ScrollDeltaX: -1; ScrollDeltaY: -1; AddedCount: -1; RemovedCount: -1;
-     ParcelableData: null ]; recordCount: 0
-
-     EventType: TYPE_VIEW_CLICKED; EventTime: 148853573; PackageName: com.android.systemui
-     MovementGranularity: 0; Action: 0; ContentChangeTypes: [];
-     WindowChangeTypes: [] [ ClassName: android.widget.Button; Text: [];
-     ContentDescription: Screen Lock; ItemCount: -1;
-     CurrentItemIndex: -1; Enabled: true; Password: false;
-     Checked: false; FullScreen: false; Scrollable: false; BeforeText: null;
-     FromIndex: -1; ToIndex: -1; ScrollX: 0; ScrollY: 0; MaxScrollX: 0; MaxScrollY: 0;
-     ScrollDeltaX: -1; ScrollDeltaY: -1; AddedCount: -1; RemovedCount: -1; ParcelableData: null ];
-     recordCount: 0
-
-
-     EventType: TYPE_VIEW_FOCUSED; EventTime: 148776307; PackageName: com.android.settings; MovementGranularity: 0; Action: 0;
-     ContentChangeTypes: []; WindowChangeTypes: [] [ ClassName: androidx.recyclerview.widget.RecyclerView;
-     Text: []; ContentDescription: null; ItemCount: 32; CurrentItemIndex: -1;
-     Enabled: true; Password: false; Checked: false; FullScreen: false; Scrollable: true;
-     BeforeText: null; FromIndex: 19; ToIndex: 31; ScrollX: 0; ScrollY: 0; MaxScrollX: 0;
-     MaxScrollY: 0; ScrollDeltaX: -1; ScrollDeltaY: -1; AddedCount: -1; RemovedCount: -1;
-     ParcelableData: null ]; recordCount: 0
-
-
-     EventType: TYPE_ANNOUNCEMENT; EventTime: 148797623; PackageName: com.oppo.launcher;
-     MovementGranularity: 0; Action: 0; ContentChangeTypes: [];
-     WindowChangeTypes: [] [ ClassName: android.widget.ScrollView; Text: [Page 2 of 5];
-     ContentDescription: null; ItemCount: -1; CurrentItemIndex: -1; Enabled: true;
-     Password: false; Checked: false; FullScreen: false; Scrollable: true;
-     BeforeText: null; FromIndex: -1; ToIndex: -1; ScrollX: 1033; ScrollY: 0;
-     MaxScrollX: 0; MaxScrollY: 0; ScrollDeltaX: -1; ScrollDeltaY: -1; AddedCount: -1;
-     RemovedCount: -1; ParcelableData: null ]; recordCount: 0*/
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        @SuppressLint("SuspiciousIndentation")
+        override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         val eventType = event?.eventType
-        val text = event?.text
-        print(event);
-        if (text != null) {
-            if(text.isEmpty()) {
-                print("cdhvgvdgdvgcdvgvcgdcddc");
-                print(text);
-            }
+
+        val text = event?.text;
+
+        println(text.toString());
+            println("des${event?.contentDescription}")
+
+        youtube = sharedPreferences.getBoolean("youtube",false)
+//        println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+        println(text.toString());
+        println(event?.packageName);
+        println(text.toString().length);
+        println(youtube)
+        if((text?.toString()?.length !!>50 && event?.packageName.toString()=="com.android.chrome") ||(text?.toString()?.length !!>5 && event?.packageName.toString()=="com.whatsapp")) {
+            println("heeeeeeeeeeeeeeeelooooooooooodnsj");
+            val intent = Intent(this, FloatingWindowGFG::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startService(intent)
+            println(text);
         }
-        when (eventType) {
-            AccessibilityEvent.TYPE_VIEW_CLICKED -> {
-                System.out.println("testing");
-                val text = event.text?.joinToString("\n") { it.toString() }
-                System.out.println(text);
-                capturedTextLiveData.postValue(text)
-                // Update UI or perform actions based on the captured text
-            }
-            // Handle other event types...
+        if(text.toString()=="[Go to channel, Action menu]" && !youtube) {
+            println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
+            webIntent= Intent(this@MyAccessibilityService, Webview_activity::class.java)
+
+            startService(webIntent)
+
         }
+        //println(gettext(event?.source));
+        val source = event?.source
+        if (source != null) {
+            // Now you have the AccessibilityNodeInfo for the clicked view (source)
+            // You can work with source to gather information about the clicked view
+            // For example, you can get its text, resource ID, and other attributes.
+            val text = source.text
+            val resourceId = source.viewIdResourceName
+            val targetViewInfo = AccessibilityNodeInfoCompat.obtain();
+            // ... perform actions with the view information
+        }
+
+//        if (eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
+//            // Call the HighlightOverlay to show the overlay on the clicked view
+//            val clickedView = event.source as View?
+//            applyGreenBorder(clickedView);
+//            println("clickkkkkkkkkkkkkkkkkkkkkkkkkkkkked");
+//
+//            // Apply green border to the clicked view
+//
+//            // Apply green border to the clicked view
+//
+//
+//            // Other handling logic
+//        }
+         if (eventType == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED) {
+            System.out.println("yesssssssssssssssssss");
+            // Handle accessibility focus event
+            // Detect double clicks and select content
+        }
+        if(text?.size!! >4) {
+            println(text);
+            if (event != null) {
+
+//                System.out.println(
+//                    String.format(
+//                        "onAccessibilityEvent: type = [ %s ], class = [ %s ], package = [ %s ], time = [ %s ], text = [ %s ]",
+//                        event, event.getClassName(), event.getPackageName(),
+//                        event.getEventTime(), event.text
+//                    )
+               // )
+            };
+
+                val broadcastIntent = Intent("READING_TEXT");
+                broadcastIntent.putExtra("READING_TEXT", text.toString());
+//                sendBroadcast(broadcastIntent);
+        }
+
+//        broadcastReceiver = object : BroadcastReceiver() {
+//            override fun onReceive(context: Context, intent: Intent) {
+//                val readingText = intent.getStringExtra("READING_TEXT")
+//                System.out.println("cccccccccccccccccccccccccc");
+//                System.out.println(readingText);
+//                // Process the reading text here
+//            }
+//        }
+//        val intentFilter = IntentFilter("READING_TEXT")
+//        registerReceiver(broadcastReceiver, intentFilter);
+//        when (eventType) {
+//            AccessibilityEvent.TYPE_VIEW_CLICKED -> {
+//                //System.out.println("testing");
+//                val text = event.text?.joinToString("\n") { it.toString() }
+//                //System.out.println(text);
+//               // capturedTextLiveData.postValue(text)
+//                // Update UI or perform actions based on the captured text
+//            }
+//            // Handle other evvent types...
+//        }
     }
+
+
     override fun onKeyEvent(event: KeyEvent): Boolean {
         val action = event.action
         val keyCode = event.keyCode
