@@ -40,6 +40,8 @@ class HelpPage: AppCompatActivity(){
     var app_names = arrayOf("whatsapp,youtube,browser")
     val NEW_SPINNER_ID = 1
     private var tv_Speech_to_text: TextView? = null
+
+    val str:String=""
     private val REQUEST_CODE_SPEECH_INPUT = 1
     private lateinit var webView: WebView
 
@@ -47,6 +49,7 @@ class HelpPage: AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.help_page)
+        tv_Speech_to_text = findViewById<TextView>(R.id.webview_text);
 
         val dropdownbutton0: ImageView =findViewById(R.id.dropdown_button);
         val permisionText0: LinearLayout=findViewById(R.id.permission_description);
@@ -142,8 +145,8 @@ class HelpPage: AppCompatActivity(){
 
 
 //
-//        val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-//        startActivity(intent)
+        val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+        startActivity(intent)
 
 
         val usageStatsManager = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
@@ -466,7 +469,7 @@ class HelpPage: AppCompatActivity(){
                     RecognizerIntent.EXTRA_RESULTS
                 )
                 tv_Speech_to_text!!.text =
-                    Objects.requireNonNull(result)?.get(0) ?: null
+                    tv_Speech_to_text!!.text.toString()+" "+Objects.requireNonNull(result)?.get(0) ?: null
             }
         }
     }

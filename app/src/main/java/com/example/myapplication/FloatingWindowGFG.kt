@@ -63,8 +63,8 @@ class FloatingWindowGFG : Service() {
     private lateinit var choreographer: Choreographer
     private lateinit var modelViewer: ModelViewer
 
-    private var userurl:String="https://letstalksign.org/extension/page1.php";
-
+  //  private var userurl:String="https://letstalksign.org/extension/page1.html";
+    private var userurl:String="file:///D:/deepvision/webview/index.html"
 
 
 
@@ -77,7 +77,7 @@ class FloatingWindowGFG : Service() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         val inflater = baseContext.getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
         floatView = inflater.inflate(R.layout.overlay_layout, null) as ViewGroup
-        val webView = floatView!!.findViewById<WebView>(R.id.overlaywebView)
+        val webView = floatView!!.findViewById<WebView>(R.id.overlay_webview)
         var floatViewheight=floatView!!.height;
         var floatViewWidth=floatView!!.width;
         println("User URL: $userurl")
@@ -169,7 +169,7 @@ class FloatingWindowGFG : Service() {
 //            webView.clearHistory()
 //            webView.webViewClient = WebViewClient()
             println("before execution");
-            webView.evaluateJavascript("hoverSpanClicked('" + message + "')", null);
+            webView.evaluateJavascript("hoverSpanClicked(" + message + ")", null);
             println("executed");
         }
 
@@ -178,7 +178,8 @@ class FloatingWindowGFG : Service() {
 
             println("heeeeeeeeeeeeeeelo"+youtubeUrl);
             // Define your Flask API endpoint
-            val apiEndpoint = "https://bd3d-103-130-204-155.ngrok-free.app/get_captions?url=$youtubeUrl"
+
+            val apiEndpoint = "https://9274-103-130-204-155.ngrok-free.app/get_captions?url=$youtubeUrl"
 
 
             // Create an instance of OkHttpClient
@@ -270,7 +271,7 @@ class FloatingWindowGFG : Service() {
         } else {
             // Handle the case where the intent is null
 //            userurl = "https://deepvisiontech.ai/tnstartup/home.html"
-            userurl="https://letstalksign.org/extension/page1.php";
+            userurl="https://letstalksign.org/extension/page1.html";
         }
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
