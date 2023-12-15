@@ -3,6 +3,7 @@ package com.example.myapplication
 import HighlightOverlay
 import android.accessibilityservice.AccessibilityService
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 //import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -31,7 +32,17 @@ class MyAccessibilityService<AccessibilityNodeInfo> : AccessibilityService() {
 
     var caption="";
 
+    fun isServiceRunning(context: Context, serviceClass: Class<*>): Boolean {
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        val runningServices = activityManager.getRunningServices(Integer.MAX_VALUE)
 
+        for (service in runningServices) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
+    }
     override fun onCreate() {
         sharedPreferences = getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
         var serviceStarted = sharedPreferences.getBoolean("serviceStarted", false)
@@ -51,40 +62,22 @@ class MyAccessibilityService<AccessibilityNodeInfo> : AccessibilityService() {
 
         val text = event?.text;
 
-        println(text.toString());
-            println("des${event?.contentDescription}")
-
-        youtube = sharedPreferences.getBoolean("youtube",false)
-//        println("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
+        println("heeeeeeeeeeeeelo");
         println(text.toString());
         println(event?.packageName);
-        println(text.toString().length);
-        println(youtube)
-        if((text?.toString()?.length !!>50 && event?.packageName.toString()=="com.android.chrome") ||(text?.toString()?.length !!>5 && event?.packageName.toString()=="com.whatsapp")) {
-            println("heeeeeeeeeeeeeeeelooooooooooodnsj");
-            val intent = Intent(this, FloatingWindowGFG::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startService(intent)
-            println(text);
+        println(event);
+        val isFloatingWindowServiceRunning = isServiceRunning(this, FloatingWindowGFG::class.java)
+        if((text?.toString()?.length !!>10 && event?.packageName.toString()=="com.android.chrome") ||(text?.toString()?.length !!>10 && event?.packageName.toString()=="com.whatsapp")) {
+            println("im insideeeeeeeeeeeeeeee"+isFloatingWindowServiceRunning.toString());
+            if (!isFloatingWindowServiceRunning) {
+                println("heeeeeeeeeeeeeeeelooooooooooodnsj");
+                val intent = Intent(this, FloatingWindowGFG::class.java)
+              //  intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                startService(intent)
+                println(text);
+            }
         }
-        if(text.toString()=="[Go to channel, Action menu]" && !youtube) {
-            println("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq");
-            webIntent= Intent(this@MyAccessibilityService, Webview_activity::class.java)
-
-            startService(webIntent)
-
-        }
-        //println(gettext(event?.source));
         val source = event?.source
-        if (source != null) {
-            // Now you have the AccessibilityNodeInfo for the clicked view (source)
-            // You can work with source to gather information about the clicked view
-            // For example, you can get its text, resource ID, and other attributes.
-            val text = source.text
-            val resourceId = source.viewIdResourceName
-            val targetViewInfo = AccessibilityNodeInfoCompat.obtain();
-            // ... perform actions with the view information
-        }
 
 //        if (eventType == AccessibilityEvent.TYPE_VIEW_CLICKED) {
 //            // Call the HighlightOverlay to show the overlay on the clicked view
@@ -100,7 +93,7 @@ class MyAccessibilityService<AccessibilityNodeInfo> : AccessibilityService() {
 //            // Other handling logic
 //        }
          if (eventType == AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED) {
-            System.out.println("yesssssssssssssssssss");
+         //   System.out.println("yesssssssssssssssssss");
             // Handle accessibility focus event
             // Detect double clicks and select content
         }
@@ -117,8 +110,8 @@ class MyAccessibilityService<AccessibilityNodeInfo> : AccessibilityService() {
                // )
             };
 
-                val broadcastIntent = Intent("READING_TEXT");
-                broadcastIntent.putExtra("READING_TEXT", text.toString());
+//                val broadcastIntent = Intent("READING_TEXT");
+//                broadcastIntent.putExtra("READING_TEXT", text.toString());
 //                sendBroadcast(broadcastIntent);
         }
 

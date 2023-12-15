@@ -9,7 +9,6 @@ import android.view.SurfaceView
 import android.view.ViewGroup
 import com.google.android.filament.utils.*
 import android.widget.FrameLayout
-import com.example.myapplication.MainActivity.Companion.glContainerx
 import com.google.android.filament.Skybox
 import java.nio.ByteBuffer
 
@@ -36,9 +35,9 @@ class LoadGlb : Service() {
 //        floatView = inflater.inflate(R.layout.overlay_layout, null) as ViewGroup
 //        glContainerx = floatView!!.findViewById<FrameLayout>(R.id.gl_container)
         val glSurfaceView = SurfaceView(this).apply {
-            glContainerx
+            //glContainerx
         }
-        glContainerx.addView(glSurfaceView)
+//        glContainerx.addView(glSurfaceView)
 
         choreographer = Choreographer.getInstance()
         modelViewer = ModelViewer(glSurfaceView)

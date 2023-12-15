@@ -2,8 +2,11 @@ package com.example.myapplication
 
 //import android.content.BroadcastReceiver
 
+import android.accounts.Account
+import android.accounts.AccountManager
 import android.app.Service
 import android.content.ComponentCallbacks2
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
@@ -53,6 +56,11 @@ class FloatingWindowGFG : Service() {
     private var closeApplicationBtn: ImageButton? = null
     private var readingTextView: TextView? = null
     var captions_message="";
+    private var initialX: Int = 0
+    private var initialY: Int = 0
+    private var initialTouchX: Float = 0.toFloat()
+    private var initialTouchY: Float = 0.toFloat()
+    private var isMoveAction = false
 //    private var broadcastReceiver: BroadcastReceiver? = null
     private lateinit var myTextView: TextView
     private val handler = Handler(Looper.getMainLooper())
@@ -63,11 +71,18 @@ class FloatingWindowGFG : Service() {
     private lateinit var choreographer: Choreographer
     private lateinit var modelViewer: ModelViewer
 
-  //  private var userurl:String="https://letstalksign.org/extension/page1.html";
-    private var userurl:String="file:///D:/deepvision/webview/index.html"
+    private var userurl:String="https://letstalksign.org/extension/page1.html";
 
-
-
+    fun getAccount(accountManager: AccountManager): Account? {
+        val accounts = accountManager.getAccountsByType("com.google")
+        val account: Account?
+        account = if (accounts.size > 0) {
+            accounts[0]
+        } else {
+            null
+        }
+        return account
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val metrics = applicationContext.resources.displayMetrics
@@ -100,6 +115,27 @@ class FloatingWindowGFG : Service() {
 //            floatView!!.layoutParams=LinearLayout.LayoutParams(webView.width, webView.height)
             println("${floatView!!.width},${floatView!!.height}");
         }
+
+        val manager = getSystemService(Context.ACCOUNT_SERVICE) as AccountManager
+        val list: Array<Account> = manager.getAccountsByType("com.google")
+
+        var gmail: String? = null
+
+        for (account in list) {
+            gmail = account.name
+            println(gmail);
+            break
+        }
+
+        println("AAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCC");
+        println(gmail);
+//        val accountName = account!!.name
+//        val fullName = accountName.substring(0, accountName.lastIndexOf("@"))
+//        println()
+
+//        Toast.makeText(this, "Full Name: $fullName", Toast.LENGTH_SHORT).show()
+//        emailEditText.setText(accountName)
+//        fullNameEditText.setText(fullName)
         fun minimizeOverlay()
         {
             println("minixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxii");
@@ -110,13 +146,12 @@ class FloatingWindowGFG : Service() {
             this.floatWindowLayoutParam=floatWindowLayoutParam;
             println("${floatView!!.width},${floatView!!.height}");
         }
-        floatView!!.setOnClickListener {
-            if (maxi)
-                minimizeOverlay();
-            else
-                maximizeOverlay();
-
-        }
+//        floatView!!.setOnClickListener {
+//            if (maxi)
+//                minimizeOverlay();
+//            else
+//                maximizeOverlay();
+//        }
 //        readingTextView = floatView!!.findViewById(R.id.overlay_text)
 
 //        maximizeBtn = floatView!!.findViewById(R.id.buttonMaximize)
@@ -135,18 +170,20 @@ class FloatingWindowGFG : Service() {
         webView.getSettings().setSupportMultipleWindows(true);
 
         webView.settings.javaScriptCanOpenWindowsAutomatically = true
+        println("helllooo world");
         webView.evaluateJavascript("console.log(\"helllo world00999293\")", null)
         webView.evaluateJavascript("window.postMessage(\"hello world test000\");") { result ->
             println("Result of evaluateJavascript: $result")
         }
-        webView.evaluateJavascript("window.addEventListener(\"message\", receiveMessage(event)\n" +
-                "{" +
-                "  console.log(\"eventtesting\"=event);\n" +
-                "    return;}, false);",null)
+        println("helllooo world");
+//        webView.evaluateJavascript("window.addEventListener(\"message\", receiveMessage(event)\n" +
+//                "{" +
+//                "  console.log(\"eventtesting\"=event);\n" +
+//                "    return;}, false);",null)
         webView.settings.domStorageEnabled = true
 
         webView.loadUrl(userurl!!)
-        //  webView.loadUrl("file:///android_asset/webview.html");
+     //   webView.loadUrl("file:///android_asset/webview.html");
 
 
         webView.clearCache(true) // Clears the cache, including disk and memory caches.
@@ -156,7 +193,7 @@ class FloatingWindowGFG : Service() {
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
-                Log.d("WebView Console.log", consoleMessage.message())
+                Log.d("WebView Console.log",consoleMessage.sourceId()+" "+consoleMessage.lineNumber()+" "+consoleMessage.message());
                 return true
             }
         }
@@ -169,7 +206,11 @@ class FloatingWindowGFG : Service() {
 //            webView.clearHistory()
 //            webView.webViewClient = WebViewClient()
             println("before execution");
-            webView.evaluateJavascript("hoverSpanClicked(" + message + ")", null);
+           // webView.evaluateJavascript("https://trrain4-web.letstalksign.org/script/mainScript-server-UG-V3.5-ext.js");
+            webView.evaluateJavascript("sendMessage("+message.toString()+");", null);
+            webView.evaluateJavascript("dt("+message+")") {result->
+                println("the message is evaluated"+result.toString());
+            }
             println("executed");
         }
 
@@ -177,9 +218,10 @@ class FloatingWindowGFG : Service() {
         fun fetchCaptionsFromAPI(youtubeUrl: String): String {
 
             println("heeeeeeeeeeeeeeelo"+youtubeUrl);
+
             // Define your Flask API endpoint
 
-            val apiEndpoint = "https://9274-103-130-204-155.ngrok-free.app/get_captions?url=$youtubeUrl"
+            val apiEndpoint = "https://65bd-103-185-239-71.ngrok-free.app/get_captions?url=$youtubeUrl"
 
 
             // Create an instance of OkHttpClient
@@ -198,6 +240,7 @@ class FloatingWindowGFG : Service() {
 
                     // Update your UI here with the error message if needed
                     // For example, you can show a Toast message
+                    println()
                     println(e.message)
                     responseB= e.toString();
 
@@ -211,6 +254,10 @@ class FloatingWindowGFG : Service() {
                         if (responseBody != null) {
                             sendMessageToWebView(responseBody)
                         };
+                        else
+                        {
+                            sendMessageToWebView("response is null");
+                        }
 //                    readingTextView?.text = responseBody
 //                    myTextView.text = responseBody
                     }
@@ -220,13 +267,14 @@ class FloatingWindowGFG : Service() {
                     println(responseBody);
                     println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
                     if (responseBody != null) {
-
+//                        sendMessageToWebView(responseBody);
                     }
                     if (responseBody != null) {
                         responseB=responseBody
                     };
                 }
             })
+          //  sendMessageToWebView("android message");
             return responseB;
         }
 
@@ -244,7 +292,6 @@ class FloatingWindowGFG : Service() {
                     println("heeeeeeeeeelomachaan");
                     println(captionsMessage);
                     // Once the API call is complete, send the message to WebView
-                    val handler = Handler()
                     handler.postDelayed({ sendMessageToWebView(captions_message) }, 2000)
 
                 } catch (e: Exception) {
@@ -275,8 +322,8 @@ class FloatingWindowGFG : Service() {
         }
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                webView.evaluateJavascript("var FunctionOne = function () { window.postMessage(\"hellllo world how are you\",*);};"
-                       , null);
+//                webView.evaluateJavascript("var FunctionOne = function () { window.postMessage(\"hellllo world how are you\",*);};"
+//                       , null);
             } else {
 //                webView.loadUrl("javascript:"
 //                        + "var FunctionOne = function () {"
@@ -307,7 +354,7 @@ class FloatingWindowGFG : Service() {
                 PixelFormat.TRANSLUCENT
             )
 
-            floatWindowLayoutParam!!.gravity = Gravity.CENTER
+            floatWindowLayoutParam!!.gravity =  Gravity.CENTER
             floatWindowLayoutParam!!.x = 0
             floatWindowLayoutParam!!.y = 0
             windowManager!!.addView(floatView, floatWindowLayoutParam)
@@ -341,12 +388,30 @@ class FloatingWindowGFG : Service() {
                             y = floatWindowLayoutUpdateParam.y.toDouble()
                             px = event.rawX.toDouble()
                             py = event.rawY.toDouble()
+                            initialTouchX = event.rawX
+                            initialTouchY = event.rawY
+                            isMoveAction = false
                         }
 
                         MotionEvent.ACTION_MOVE -> {
+                            val deltaX = (event.rawX - initialTouchX).toInt()
+                            val deltaY = (event.rawY - initialTouchY).toInt()
                             floatWindowLayoutUpdateParam.x = (x + event.rawX - px).toInt()
                             floatWindowLayoutUpdateParam.y = (y + event.rawY - py).toInt()
                             windowManager!!.updateViewLayout(floatView, floatWindowLayoutUpdateParam)
+                            if (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5) {
+                                isMoveAction = true
+                            }
+                        }
+                        MotionEvent.ACTION_UP -> {
+                            if (!isMoveAction) {
+                                // If it's a tap (not a move), call the appropriate function
+//                                if (maxi) {
+//                                    minimizeOverlay()
+//                                } else {
+//                                    maximizeOverlay()
+//                                }
+                            }
                         }
                     }
                     return false

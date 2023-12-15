@@ -26,7 +26,7 @@ class HomePage: AppCompatActivity() {
         // Set OnClickListener for the ImageView
         imageView.setOnClickListener {
             // Launch the TargetActivity when ImageView is clicked
-            val intent = Intent(this, HelpPage::class.java)
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
 

@@ -1,12 +1,9 @@
 package com.example.myapplication
 
 import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.AccessibilityServiceInfo
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.util.Log
-import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.widget.TextView
 
